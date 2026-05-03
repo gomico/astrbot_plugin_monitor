@@ -1,0 +1,32 @@
+{
+    "_section_header_basic": {
+        "description": "═══════════════ 基本设置 ═══════════════",
+        "type": "string",
+        "hint": "插件的基本功能配置",
+        "default": "--- 基本设置 ---"
+    },
+    "forward_prefix": {
+        "description": "转发消息前缀模板",
+        "type": "string",
+        "hint": "消息转发时添加的前缀，可用占位符 {group_id}（来源群号）、{sender_name}（发送者昵称）。留空则不添加前缀",
+        "default": "[来自群{group_id}的{sender_name}]\n"
+    },
+    "max_message_count": {
+        "description": "抽查消息最大数量",
+        "type": "int",
+        "hint": "使用「抽查」命令时，单次允许查询的最大消息数量，防止误操作拉取过多消息",
+        "default": 999
+    },
+    "_section_header_monitor": {
+        "description": "═══════════════ 监听映射 ═══════════════",
+        "type": "string",
+        "hint": "预配置的监听映射关系，插件启动时自动加载。格式：[{\"from_gid\": 群A, \"to_gid\": 群B}, ...] 表示群A监听群B的消息",
+        "default": "--- 监听映射 ---"
+    },
+    "auto_monitor_map": {
+        "description": "预配置监听映射表",
+        "type": "list",
+        "hint": "启动时自动加载的监听关系。数组元素为对象，格式：{\"from_gid\": 监听群号, \"to_gid\": 被监听群号}。留空则不预配置任何监听关系",
+        "default": []
+    }
+}

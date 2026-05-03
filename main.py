@@ -11,12 +11,21 @@ from astrbot.core.platform.sources.aiocqhttp.aiocqhttp_message_event import (
 
 
 class MonitorPlugin(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config: dict = None):
         super().__init__(context)
+        self.config = config or {}
         # 监听群 -> 被监听群
         self.monitor_map: dict[int, int] = {}
+        self._load_auto_monitor_map()
 
     # ---------- 工具函数 ----------
+    def _load_auto_monitor_map(self):
+        for entry in self.config.get("auto_monitor_map", []):
+            from_gid = entry.get("from_gid")
+            to_gid = entry.get("to_gid")
+            if from_gid and to_gid:
+                self.monitor_map[int(from_gid)] = int(to_gid)
+
     def extract_group_ids(self, text: str) -> list[int]:
         return [int(gid) for gid in re.findall(r"\d{6,10}", text)]
 
@@ -59,8 +68,9 @@ class MonitorPlugin(Star):
     ):
         """抽查 [群号] [数量]"""
         args = event.message_str.split()
+        max_count = self.config.get("max_message_count", 999)
         count = next(
-            (int(arg) for arg in args if arg.isdigit() and int(arg) < 1000), 20
+            (int(arg) for arg in args if arg.isdigit() and int(arg) <= max_count), 20
         )
 
         group_ids = [group_id] if group_id else self.get_group_ids(event)
@@ -163,7 +173,12 @@ class MonitorPlugin(Star):
         if not listeners:
             return
         sender_name = event.get_sender_name()
-        forward_msg = f"[来自群{group_id}的{sender_name}]\n{event.message_str}"
+        prefix = self.config.get("forward_prefix", "").strip()
+        forward_msg = (
+            prefix.format(group_id=group_id, sender_name=sender_name) + event.message_str
+            if prefix
+            else event.message_str
+        )
 
         for from_gid in listeners:
             try:
